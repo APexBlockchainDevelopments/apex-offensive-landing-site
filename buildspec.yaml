@@ -1,0 +1,30 @@
+version: 0.2
+
+env:
+  variables:
+    ENV_MODE: "production"
+    S3_BUCKET: "apex-offensive-landing-site"
+    CLOUDFRONT_ID: "E37DPWW9S4WXLN"
+    NPM_CONFIG_LEGACY_PEER_DEPS: "true"
+
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+    commands:
+      - echo Installing dependencies...
+      - npm ci
+
+  build:
+    commands:
+      - npm run build
+  
+  post_build:
+    commands:
+          - aws s3 sync build/ s3://$S3_BUCKET/ --delete
+          - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"  
+
+artifacts:
+  files:
+    - '**/*'
