@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#0a0a0a">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APex Offensive — Offensive Security</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --bg-2: #0e0e0e;
+    --bg-3: #141414;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.13);
+    --text: #f0f0f0;
+    --text-muted: #666;
+    --text-dim: #444;
+    --accent: #c0392b;
+    --accent-2: #8c1f19;
+    --mono: 'DM Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 48px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,8,0.9);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text) !important;
+    border: 1px solid var(--border-strong) !important;
+    padding: 8px 18px;
+    letter-spacing: 0.08em;
+    transition: border-color 0.2s, background 0.2s !important;
+  }
+
+  .nav-cta:hover {
+    border-color: var(--accent) !important;
+    background: rgba(192,57,43,0.08) !important;
+  }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 0;
+    padding: 0 48px;
+    padding-top: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+  }
+
+  .hero-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, transparent 30%, rgba(8,8,8,0.8) 100%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(48px, 5.5vw, 80px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 28px;
+    max-width: 720px;
+  }
+
+  h1 em { font-style: normal; color: var(--accent); }
+
+  .hero-sub {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--text-muted);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 44px;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .btn-primary {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    padding: 14px 32px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover { background: #a93226; }
+
+  .btn-ghost {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .btn-ghost:hover { color: var(--text); }
+  .btn-ghost svg { transition: transform 0.2s; }
+  .btn-ghost:hover svg { transform: translateX(4px); }
+
+  /* ─── HERO SIDEBAR ─── */
+  .hero-sidebar {
+    border-left: 1px solid var(--border);
+    padding: 80px 0 80px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .focus-areas-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .focus-card {
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-bottom: 10px;
+    background: var(--bg-2);
+    transition: border-color 0.2s;
+    cursor: default;
+  }
+
+  .focus-card:hover { border-color: var(--border-strong); }
+
+  .focus-card-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .focus-card-title {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .focus-card-desc {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ─── SECTION SCAFFOLDING ─── */
+  section {
+    padding: 120px 48px;
+    border-top: 1px solid var(--border);
+    position: relative;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-size: clamp(32px, 3.5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h2 em { font-style: normal; color: var(--accent); }
+
+  /* ─── SERVICES ─── */
+  #services .intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-bottom: 64px;
+    align-items: end;
+  }
+
+  .services-desc {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-top: 24px;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .service-card {
+    background: var(--bg);
+    padding: 36px 28px;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .service-card:hover { background: var(--bg-2); }
+  .service-card:hover::before { transform: scaleX(1); }
+
+  .service-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    color: var(--accent);
+  }
+
+  .service-title {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .service-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .service-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    text-transform: uppercase;
+  }
+
+  /* ─── DIFFERENTIATOR ─── */
+  #differentiator { background: var(--bg-2); }
+
+  .diff-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .diff-content h2 { margin-bottom: 24px; }
+
+  .diff-body {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+
+  .diff-points {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .diff-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .diff-point:last-child { border-bottom: none; }
+  .diff-point:hover { background: rgba(255,255,255,0.02); }
+
+  .diff-point-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    min-width: 24px;
+    padding-top: 2px;
+  }
+
+  .diff-point-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .diff-point-text strong { display: block; font-weight: 500; margin-bottom: 4px; }
+  .diff-point-text span { font-size: 13px; color: var(--text-muted); font-weight: 300; }
+
+  /* ─── METHODOLOGY VISUAL ─── */
+  .methodology-panel {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 32px;
+  }
+
+  .panel-header {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .panel-header span { color: var(--accent); }
+
+  .method-step {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .method-step:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .method-arrow {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding-top: 1px;
+    min-width: 16px;
+  }
+
+  .method-step-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .method-step-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* ─── PROOF SECTION ─── */
+  #proof .proof-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  .proof-card {
+    background: var(--bg);
+    padding: 36px 32px;
+    transition: background 0.2s;
+  }
+
+  .proof-card:hover { background: var(--bg-2); }
+
+  .proof-severity {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sev-critical { color: #e74c3c; }
+  .sev-high { color: #e67e22; }
+
+  .sev-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .proof-title {
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .proof-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .proof-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── STATS ROW ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 80px;
+  }
+
+  .stat-cell {
+    background: var(--bg-2);
+    padding: 36px 32px;
+    text-align: left;
+  }
+
+  .stat-num {
+    font-family: var(--display);
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-num span { color: var(--accent); }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ─── CONTACT ─── */
+  #contact { background: var(--bg-2); }
+
+  .contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .contact-lead {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-top: 24px;
+    margin-bottom: 40px;
+    max-width: 480px;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-field label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 300;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus { border-color: var(--accent); }
+
+  .form-field select option { background: #1a1a1a; }
+  .form-field textarea { resize: vertical; min-height: 100px; }
+
+  .form-submit {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    padding: 15px 32px;
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+
+  .form-submit:hover { background: #a93226; }
+
+  /* ─── CONTACT SIDEBAR ─── */
+  .contact-sidebar { padding-top: 8px; }
+
+  .contact-info-block {
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 12px;
+    background: var(--bg);
+  }
+
+  .cib-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .cib-value { font-size: 14px; color: var(--text); font-weight: 400; }
+  .cib-note { font-size: 12px; color: var(--text-muted); font-weight: 300; margin-top: 4px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .footer-logo span { color: var(--accent); }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  /* ─── LOAD ANIMATION ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-eyebrow { animation: fadeUp 0.6s ease both; }
+  h1 { animation: fadeUp 0.6s ease 0.1s both; }
+  .hero-sub { animation: fadeUp 0.6s ease 0.2s both; }
+  .hero-actions { animation: fadeUp 0.6s ease 0.3s both; }
+  .hero-sidebar { animation: fadeUp 0.6s ease 0.35s both; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 1100px) {
+    #hero { grid-template-columns: 1fr; }
+    .hero-sidebar { display: none; }
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+    .diff-layout { grid-template-columns: 1fr; }
+    .proof-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .contact-layout { grid-template-columns: 1fr; }
+    #services .intro { grid-template-columns: 1fr; gap: 24px; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 24px; }
+    section, #hero { padding-left: 24px; padding-right: 24px; }
+    .nav-links { display: none; }
+    .services-grid { grid-template-columns: 1fr; }
+    .proof-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    footer { padding: 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">APex<span>.</span>Offensive</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#differentiator">Approach</a></li>
+    <li><a href="#proof">Work</a></li>
+    <li><a href="#contact" class="nav-cta">Request Assessment</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-lines"></div>
+  <div class="hero-vignette"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">Offensive Security</div>
+    <h1>We break modern systems <em>before</em> attackers do.</h1>
+    <p class="hero-sub">
+      Adversarial testing across AI applications, financial platforms, cloud infrastructure, and distributed systems. We simulate how real attackers operate—not how compliance checklists assume they do.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Request Assessment</a>
+      <a href="#services" class="btn-ghost">
+        View Services
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 7h10M8 3l4 4-4 4"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-sidebar">
+    <div class="focus-areas-label">Core Focus Areas</div>
+    <div class="focus-card">
+      <div class="focus-card-num">01</div>
+      <div class="focus-card-title">AI System Security</div>
+      <div class="focus-card-desc">Adversarial attacks against ML models, prompt injection, inference manipulation.</div>
+    </div>
+    <div class="focus-card">
+      <div class="focus-card-num">02</div>
+      <div class="focus-card-title">App &amp; Cloud Pentesting</div>
+      <div class="focus-card-desc">Full-stack application testing, cloud misconfiguration, privilege escalation.</div>
+    </div>
+    <div class="focus-card">
+      <div class="focus-card-num">03</div>
+      <div class="focus-card-title">Web3 &amp; Financial Security</div>
+      <div class="focus-card-desc">Smart contract audits, DeFi attack vectors, financial platform exploitation.</div>
+    </div>
+    <div class="focus-card">
+      <div class="focus-card-num">04</div>
+      <div class="focus-card-title">Physical &amp; Real-World</div>
+      <div class="focus-card-desc">Social engineering, physical access testing, blended attack paths.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-label">Services</div>
+  <div class="intro">
+    <div>
+      <h2>Every attack surface.<br><em>Exploited first.</em></h2>
+    </div>
+    <div>
+      <p class="services-desc">
+        We conduct offensive testing across the full range of modern attack surfaces—from AI inference pipelines and smart contracts to physical facilities and human targets. Each engagement is adversarially scoped, not checkbox-driven.
+      </p>
+    </div>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="14" height="14" rx="1"/>
+          <path d="M6 9h6M9 6v6"/>
+        </svg>
+      </div>
+      <div class="service-title">AI Security</div>
+      <div class="service-desc">Adversarial testing of LLM deployments, ML pipelines, and AI-integrated applications. We identify prompt injection, model extraction, and inference-time attack paths.</div>
+      <div class="service-tags">
+        <span class="tag">Prompt Injection</span>
+        <span class="tag">Model Extraction</span>
+        <span class="tag">RAG Attacks</span>
+        <span class="tag">Jailbreaking</span>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 5h14M2 9h14M2 13h14"/>
+        </svg>
+      </div>
+      <div class="service-title">Application &amp; Cloud</div>
+      <div class="service-desc">Full-stack web application testing, API exploitation, cloud infrastructure assessment, and container escape. We go beyond OWASP—into the exploitation chains that matter.</div>
+      <div class="service-tags">
+        <span class="tag">API Exploitation</span>
+        <span class="tag">Cloud IAM</span>
+        <span class="tag">Container Escape</span>
+        <span class="tag">SSRF</span>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polygon points="9,2 16,14 2,14"/>
+        </svg>
+      </div>
+      <div class="service-title">Web3 &amp; Financial</div>
+      <div class="service-desc">Smart contract audits, DeFi protocol exploitation, MEV attacks, and financial platform testing. We simulate economically-motivated adversaries—not academic scanners.</div>
+      <div class="service-tags">
+        <span class="tag">Smart Contracts</span>
+        <span class="tag">Reentrancy</span>
+        <span class="tag">MEV</span>
+        <span class="tag">DeFi Logic</span>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="9" cy="7" r="3"/>
+          <path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
+      </div>
+      <div class="service-title">Physical &amp; Real-World</div>
+      <div class="service-desc">Physical intrusion testing, social engineering campaigns, and hybrid attack paths that combine digital access with physical presence—because attackers don't stay behind keyboards.</div>
+      <div class="service-tags">
+        <span class="tag">Physical Intrusion</span>
+        <span class="tag">Social Engineering</span>
+        <span class="tag">Hybrid Paths</span>
+        <span class="tag">OSINT</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFFERENTIATOR -->
+<section id="differentiator">
+  <div class="section-label">Approach</div>
+  <div class="diff-layout">
+    <div class="diff-content">
+      <h2>Adversarial by<br><em>design.</em></h2>
+      <p class="diff-body">
+        Most security firms run scanners and produce reports. We think like adversaries—identifying the full kill chain, not just individual vulnerabilities. Our engagements are scoped to answer one question: could a motivated attacker reach your critical assets?
+      </p>
+      <ul class="diff-points">
+        <li class="diff-point">
+          <span class="diff-point-num">01</span>
+          <div class="diff-point-text">
+            <strong>Attacker Mindset</strong>
+            <span>We model threat actors—their objectives, capabilities, and real-world tactics—not compliance checklists.</span>
+          </div>
+        </li>
+        <li class="diff-point">
+          <span class="diff-point-num">02</span>
+          <div class="diff-point-text">
+            <strong>Exploit Chaining</strong>
+            <span>Individual vulnerabilities rarely cause breaches. We find and chain findings into complete attack paths.</span>
+          </div>
+        </li>
+        <li class="diff-point">
+          <span class="diff-point-num">03</span>
+          <div class="diff-point-text">
+            <strong>Modern Attack Surfaces</strong>
+            <span>AI systems, blockchain protocols, and distributed infrastructure require offensive expertise that goes beyond traditional pentesting.</span>
+          </div>
+        </li>
+        <li class="diff-point">
+          <span class="diff-point-num">04</span>
+          <div class="diff-point-text">
+            <strong>Blended Vectors</strong>
+            <span>Digital and physical attack paths are evaluated together—because real adversaries use both.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="methodology-panel">
+      <div class="panel-header">
+        <span>Engagement Methodology</span>
+        <span>v2.1</span>
+      </div>
+      <div class="method-step">
+        <span class="method-arrow">→</span>
+        <div class="method-step-content">
+          <div class="method-step-title">Threat Modeling</div>
+          <div class="method-step-desc">Define threat actors, objectives, and realistic attack scenarios before testing begins.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <span class="method-arrow">→</span>
+        <div class="method-step-content">
+          <div class="method-step-title">Reconnaissance</div>
+          <div class="method-step-desc">Active and passive intelligence collection across digital, physical, and human surfaces.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <span class="method-arrow">→</span>
+        <div class="method-step-content">
+          <div class="method-step-title">Exploitation</div>
+          <div class="method-step-desc">Hands-on exploitation across all identified vectors. No automated-scan-and-report.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <span class="method-arrow">→</span>
+        <div class="method-step-content">
+          <div class="method-step-title">Chaining &amp; Impact</div>
+          <div class="method-step-desc">Combine vulnerabilities into full attack paths. Demonstrate real business impact.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <span class="method-arrow">→</span>
+        <div class="method-step-content">
+          <div class="method-step-title">Reporting &amp; Debrief</div>
+          <div class="method-step-desc">Technical report plus executive debrief. Remediation guidance that's actionable.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section id="proof">
+  <div class="section-label">Exploit Scenarios</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;">
+    <h2>What real<br><em>exploitation</em> looks like.</h2>
+    <p style="font-size:15px;font-weight:300;color:var(--text-muted);line-height:1.8;">Representative scenarios from our engagements—demonstrating the types of exploit chains and impact-level findings we uncover. Details redacted for client confidentiality.</p>
+  </div>
+
+  <div class="proof-grid">
+    <div class="proof-card">
+      <div class="proof-severity sev-critical"><span class="sev-dot"></span>Critical</div>
+      <div class="proof-title">LLM Prompt Injection → Data Exfiltration</div>
+      <div class="proof-desc">Adversarial input to an AI-powered customer service agent manipulated system instructions, redirected tool calls, and exfiltrated internal knowledge base content via crafted response formatting.</div>
+      <div class="proof-meta">
+        <span class="tag">AI / LLM</span>
+        <span class="tag">Prompt Injection</span>
+        <span class="tag">Data Exfil</span>
+      </div>
+    </div>
+
+    <div class="proof-card">
+      <div class="proof-severity sev-critical"><span class="sev-dot"></span>Critical</div>
+      <div class="proof-title">Smart Contract Reentrancy → $4.2M Drain Path</div>
+      <div class="proof-desc">Identified a reentrancy vulnerability in a DeFi lending protocol's withdrawal function, compounded by missing access controls on flash loan callbacks. Full exploit path demonstrated in forked environment.</div>
+      <div class="proof-meta">
+        <span class="tag">Web3</span>
+        <span class="tag">Reentrancy</span>
+        <span class="tag">DeFi</span>
+      </div>
+    </div>
+
+    <div class="proof-card">
+      <div class="proof-severity sev-high"><span class="sev-dot"></span>High</div>
+      <div class="proof-title">SSRF → IAM Metadata → Cloud Account Takeover</div>
+      <div class="proof-desc">Server-side request forgery in a public-facing API allowed access to AWS instance metadata, exposing credentials with overpermissioned IAM roles. Lateral movement to production S3 buckets achieved.</div>
+      <div class="proof-meta">
+        <span class="tag">Cloud</span>
+        <span class="tag">SSRF</span>
+        <span class="tag">IAM</span>
+      </div>
+    </div>
+
+    <div class="proof-card">
+      <div class="proof-severity sev-critical"><span class="sev-dot"></span>Critical</div>
+      <div class="proof-title">Physical Breach + Credential Harvest → Full Domain Compromise</div>
+      <div class="proof-desc">Physical access to an unmanned workstation combined with a USB HID attack and credential caching led to domain admin within 40 minutes—without triggering a single SIEM alert.</div>
+      <div class="proof-meta">
+        <span class="tag">Physical</span>
+        <span class="tag">HID Attack</span>
+        <span class="tag">Lateral Movement</span>
+      </div>
+    </div>
+
+    <div class="proof-card">
+      <div class="proof-severity sev-high"><span class="sev-dot"></span>High</div>
+      <div class="proof-title">API Logic Flaw → Account Balance Manipulation</div>
+      <div class="proof-desc">Race condition in a fintech platform's transfer API allowed balance multiplication through concurrent requests. Integer overflow in a secondary validation endpoint compounded the exposure.</div>
+      <div class="proof-meta">
+        <span class="tag">Financial</span>
+        <span class="tag">Race Condition</span>
+        <span class="tag">Logic Flaw</span>
+      </div>
+    </div>
+
+    <div class="proof-card">
+      <div class="proof-severity sev-high"><span class="sev-dot"></span>High</div>
+      <div class="proof-title">Social Engineering → Insider Access Path</div>
+      <div class="proof-desc">Multi-stage vishing campaign targeting IT helpdesk staff resulted in MFA bypass and password reset for a privileged engineering account—exploiting policy gaps rather than technical vulnerabilities.</div>
+      <div class="proof-meta">
+        <span class="tag">Social Engineering</span>
+        <span class="tag">Vishing</span>
+        <span class="tag">MFA Bypass</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-cell">
+      <div class="stat-num">100<span>%</span></div>
+      <div class="stat-label">of engagements yielded critical or high findings</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">4<span>+</span></div>
+      <div class="stat-label">distinct attack surface categories covered</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">0</div>
+      <div class="stat-label">automated-only engagements. Ever.</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">Full<span>.</span></div>
+      <div class="stat-label">kill chain documented, not just individual findings</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">Engage</div>
+  <div class="contact-layout">
+    <div>
+      <h2>Request an<br><em>Assessment.</em></h2>
+      <p class="contact-lead">
+        Engagements are scoped to your specific threat model. We work with security-conscious organizations that want to understand their real exposure—not their compliance posture.
+      </p>
+
+      <form class="contact-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Name</label>
+            <input type="text" placeholder="Your name">
+          </div>
+          <div class="form-field">
+            <label>Organization</label>
+            <input type="text" placeholder="Company or project">
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <input type="email" placeholder="Work email preferred">
+        </div>
+        <div class="form-field">
+          <label>Area of Interest</label>
+          <select>
+            <option value="" disabled selected>Select a service area</option>
+            <option>AI Security</option>
+            <option>Application &amp; Cloud Pentesting</option>
+            <option>Web3 / Financial Security</option>
+            <option>Physical &amp; Real-World Security</option>
+            <option>Full-Scope Red Team</option>
+            <option>Not sure — needs scoping</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Brief Description</label>
+          <textarea placeholder="Describe what you're trying to test, or what concern prompted this inquiry..."></textarea>
+        </div>
+        <button type="submit" class="form-submit">Submit Request</button>
+      </div>
+    </form>
+
+    <div class="contact-sidebar">
+      <div class="contact-info-block">
+        <div class="cib-label">Response Time</div>
+        <div class="cib-value">Within 24 hours</div>
+        <div class="cib-note">All inquiries are reviewed and responded to directly by the engagement team.</div>
+      </div>
+      <div class="contact-info-block">
+        <div class="cib-label">Confidentiality</div>
+        <div class="cib-value">NDA available before scoping</div>
+        <div class="cib-note">We operate under strict confidentiality. NDAs are available prior to any discovery conversation.</div>
+      </div>
+      <div class="contact-info-block">
+        <div class="cib-label">Engagement Types</div>
+        <div class="cib-value">Fixed-scope · Open-scope · Retainer</div>
+        <div class="cib-note">Engagements range from targeted single-surface assessments to full red team operations.</div>
+      </div>
+      <div class="contact-info-block">
+        <div class="cib-label">Secure Contact</div>
+        <div class="cib-value" style="font-family:var(--mono);font-size:12px;">contact@apexoffensive.io</div>
+        <div class="cib-note">PGP key available on request for encrypted communication.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">APex<span>.</span>Offensive</div>
+  <div class="footer-copy">© 2026 APex Offensive. All rights reserved.</div>
+</footer>
+
+<script>
+  const form = document.querySelector('.contact-form');
+  const submitBtn = form.querySelector('.form-submit');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Sending...';
+    submitBtn.disabled = true;
+
+    const payload = {
+      name: form.querySelector('input[placeholder="Your name"]').value,
+      organization: form.querySelector('input[placeholder="Company or project"]').value,
+      email: form.querySelector('input[type="email"]').value,
+      interest: form.querySelector('select').value,
+      description: form.querySelector('textarea').value,
+    };
+
+    try {
+      const res = await fetch('https://2b88s68jnd.execute-api.us-east-1.amazonaws.com/prod/landing-site-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        submitBtn.textContent = 'Request Sent';
+        submitBtn.style.background = '#27ae60';
+        form.querySelectorAll('input, select, textarea').forEach(el => el.value = '');
+      } else {
+        throw new Error('Server error');
+      }
+    } catch {
+      submitBtn.textContent = 'Something went wrong — try again';
+      submitBtn.style.background = '#c0392b';
+      submitBtn.disabled = false;
+      setTimeout(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.style.background = '';
+      }, 3000);
+    }
+  });
+</script>
+
+</body>
+</html>
