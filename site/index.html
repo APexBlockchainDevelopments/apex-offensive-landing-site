@@ -714,6 +714,21 @@
 
   .form-submit:hover { background: #a93226; }
 
+  /* Research instrumentation: honeypot fields. Removed from the layout entirely and
+     unreachable by keyboard, so no human and no screen reader encounters them.
+     `display:none` is avoided deliberately — the naive parsers this is meant to
+     catch often skip hidden inputs, and this keeps them in the DOM as real fields. */
+  .hp-field {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   /* ─── CONTACT SIDEBAR ─── */
   .contact-sidebar { padding-top: 8px; }
 
@@ -1142,20 +1157,20 @@
         <div class="form-row">
           <div class="form-field">
             <label>Name</label>
-            <input type="text" placeholder="Your name">
+            <input type="text" name="name" placeholder="Your name">
           </div>
           <div class="form-field">
             <label>Organization</label>
-            <input type="text" placeholder="Company or project">
+            <input type="text" name="organization" placeholder="Company or project">
           </div>
         </div>
         <div class="form-field">
           <label>Email</label>
-          <input type="email" placeholder="Work email preferred">
+          <input type="email" name="email" placeholder="Work email preferred">
         </div>
         <div class="form-field">
           <label>Area of Interest</label>
-          <select>
+          <select name="interest">
             <option value="" disabled selected>Select a service area</option>
             <option>AI Security</option>
             <option>Application &amp; Cloud Pentesting</option>
@@ -1167,11 +1182,24 @@
         </div>
         <div class="form-field">
           <label>Brief Description</label>
-          <textarea placeholder="Describe what you're trying to test, or what concern prompted this inquiry..."></textarea>
+          <textarea name="description" placeholder="Describe what you're trying to test, or what concern prompted this inquiry..."></textarea>
         </div>
+
+        <!-- Research instrumentation: honeypot fields. Off-canvas, untabbable and
+             aria-hidden, so no human or assistive technology ever reaches them.
+             Anything that arrives filled came from an automated form parser. -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="website">Website</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+          <label for="phone2">Phone</label>
+          <input type="text" id="phone2" name="phone2" tabindex="-1" autocomplete="off">
+          <label for="company_url">Company URL</label>
+          <input type="text" id="company_url" name="company_url" tabindex="-1" autocomplete="off">
+        </div>
+
         <button type="submit" class="form-submit">Submit Request</button>
-      </div>
-    </form>
+      </form>
+    </div>
 
     <div class="contact-sidebar">
       <div class="contact-info-block">
@@ -1204,7 +1232,17 @@
   <div class="footer-copy">© 2026 APex Offensive. All rights reserved.</div>
 </footer>
 
+<!-- Research instrumentation. Point __APEX_TELEMETRY_API__ at the CloudFront hostname
+     in front of the collector once research/collector/INFRA.md step 1 is done — the raw
+     execute-api URL yields no JA3/JA4, which are the most durable fingerprints available. -->
 <script>
+  window.__APEX_TELEMETRY_API__ =
+    'https://2b88s68jnd.execute-api.us-east-1.amazonaws.com/prod';
+</script>
+<script src="/beacon.js"></script>
+
+<script>
+  const TELEMETRY_API = window.__APEX_TELEMETRY_API__;
   const form = document.querySelector('.contact-form');
   const submitBtn = form.querySelector('.form-submit');
 
@@ -1216,15 +1254,24 @@
     submitBtn.disabled = true;
 
     const payload = {
-      name: form.querySelector('input[placeholder="Your name"]').value,
-      organization: form.querySelector('input[placeholder="Company or project"]').value,
+      name: form.querySelector('input[name="name"]').value,
+      organization: form.querySelector('input[name="organization"]').value,
       email: form.querySelector('input[type="email"]').value,
       interest: form.querySelector('select').value,
       description: form.querySelector('textarea').value,
     };
 
+    // Research instrumentation. Merged in defensively: if beacon.js failed to load or
+    // threw, this contributes nothing and the form submits exactly as it did before.
+    // A broken beacon must never become a broken contact form.
     try {
-      const res = await fetch('https://2b88s68jnd.execute-api.us-east-1.amazonaws.com/prod/landing-site-inquiry', {
+      if (window.__apexBeacon) {
+        Object.assign(payload, window.__apexBeacon.collect(), window.__apexBeacon.traps());
+      }
+    } catch (_) { /* fail open */ }
+
+    try {
+      const res = await fetch(TELEMETRY_API + '/landing-site-inquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
