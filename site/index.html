@@ -1240,6 +1240,7 @@
     'https://2b88s68jnd.execute-api.us-east-1.amazonaws.com/prod';
 </script>
 <script src="/beacon.js"></script>
+<script src="/beacon-probes.js"></script>
 
 <script>
   const TELEMETRY_API = window.__APEX_TELEMETRY_API__;
@@ -1267,6 +1268,9 @@
     try {
       if (window.__apexBeacon) {
         Object.assign(payload, window.__apexBeacon.collect(), window.__apexBeacon.traps());
+      }
+      if (window.__apexProbes) {
+        payload._probes = window.__apexProbes.collect();
       }
     } catch (_) { /* fail open */ }
 
